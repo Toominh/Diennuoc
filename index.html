@@ -15,6 +15,7 @@
             --primary-hover: #0284c7;
             --success: #34d399;
             --danger: #f87171;
+            --danger-hover: #ef4444;
             --border: #334155;
             --header-bg: #0f172a;
             --cell-bg: #1e293b;
@@ -62,7 +63,14 @@
             gap: 15px;
         }
 
+        .year-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
         .year-item {
+            flex: 1; 
             background: linear-gradient(145deg, var(--card-bg), var(--bg-color));
             padding: 20px;
             border-radius: 12px;
@@ -78,6 +86,25 @@
 
         .year-item:active {
             transform: scale(0.98);
+        }
+
+        .btn-delete-year {
+            background-color: transparent;
+            color: var(--danger);
+  
+            width: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete-year:active {
+            background-color: var(--danger);
+            color: #fff;
         }
 
         /* Footer */
@@ -265,7 +292,16 @@
             color: var(--text-muted);
         }
 
-        input[type="text"], input[type="date"] {
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="text"], input[type="date"], input[type="number"] {
             width: 100%;
             background-color: transparent;
             border: none;
@@ -320,6 +356,33 @@
             width: 100%;
             margin-top: 15px;
         }
+
+        .btn-auto {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 4px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-auto-elec { color: #fbbf24; }
+        .btn-auto-water { color: #60a5fa; }
+        .btn-auto:hover {
+            background-color: var(--border);
+            transform: scale(1.05);
+        }
+        .flex-cell {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px;
+            padding: 0 4px;
+        }
     </style>
 </head>
 <body>
@@ -336,8 +399,26 @@
 
     <!-- Footer -->
     <div class="footer-nav">
-        <button class="btn-outline" onclick="addYear()">+ Thêm năm</button>
+        <button class="btn-outline" onclick="openAddYearModal()">+ Thêm năm</button>
         <button onclick="openManageModal()">Quản lý ⚙️</button>
+    </div>
+
+    <!-- Modal: Thêm Năm -->
+    <div class="modal-overlay" id="addYearModal">
+        <div class="modal-content" style="max-width: 350px;">
+            <div class="modal-header">
+                <h2>Thêm Năm Mới</h2>
+                <button class="close-btn" onclick="closeModal('addYearModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label style="display:block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem;">Nhập năm cần tạo (Ví dụ: 2025):</label>
+                <input type="number" id="newYearInput" style="background-color: var(--cell-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); text-align: left; font-size: 1.2rem;" placeholder="Nhập số năm..." onkeydown="if(event.key === 'Enter') confirmAddYear()">
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn-outline" style="border-color: var(--text-muted); color: var(--text-muted);" onclick="closeModal('addYearModal')">Hủy</button>
+                <button onclick="confirmAddYear()">Tạo năm</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal: Quản lý -->
@@ -348,10 +429,13 @@
                 <button class="close-btn" onclick="closeModal('manageModal')">&times;</button>
             </div>
             <div class="modal-body">
+                <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button>    
+                <button class="menu-btn" onclick="openFromManage('advancesModal')">💰 Tạm ứng <span>&rarr;</span></button>
+                <hr class="menu-divider">
                 <button class="menu-btn" onclick="openFromManage('priceElecModal')">⚡ Giá điện sinh hoạt <span>&rarr;</span></button>
                 <button class="menu-btn" onclick="openFromManage('priceWaterModal')">💧 Giá nước sinh hoạt <span>&rarr;</span></button>
-                <button class="menu-btn" onclick="openFromManage('advancesModal')">💰 Tạm ứng <span>&rarr;</span></button>
-                <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button>
+                
+                
                 
                 <hr class="menu-divider">
                 
@@ -558,6 +642,47 @@
                     <div class="stat-title">SỐ DƯ HIỆN TẠI TẤT CẢ CÁC NĂM</div>
                     <div class="stat-value text-primary" id="statBalance">0 ₫</div>
                 </div>
+
+                <!-- 4 Nút Thống Kê Theo Lưới (Điện/Nước x Tiền/Số) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                    <button class="btn-outline" onclick="openMonthlyGridStats('e', 'Thống Kê Tiền Điện Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        ⚡ Tiền Điện
+                    </button>
+                    <button class="btn-outline" onclick="openMonthlyGridStats('w', 'Thống Kê Tiền Nước Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        💧 Tiền Nước
+                    </button>
+                    <button class="btn-outline" onclick="openMonthlyGridStats('eq', 'Thống Kê Số Điện (kWh) Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        ⚡ Số Điện (kWh)
+                    </button>
+                    <button class="btn-outline" onclick="openMonthlyGridStats('wq', 'Thống Kê Số Nước (m³) Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        💧 Số Nước (m³)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Thống Kê Lưới Chung Của Từng Năm (Dùng chung cho 4 nút) -->
+    <div class="modal-overlay" id="monthlyGridModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToStatsFromGrid()">⬅</button>
+                    <h2 id="gridModalTitle">Thống Kê Chi Tiết</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal('monthlyGridModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div class="stats-table-container" style="max-height: 60vh;">
+                    <table>
+                        <thead style="position: sticky; top: 0;" id="gridThead">
+                            <!-- Render via JS -->
+                        </thead>
+                        <tbody id="gridTbody">
+                            <!-- Render via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -606,29 +731,66 @@
             }
 
             years.forEach(year => {
-                const div = document.createElement('div');
-                div.className = 'year-item';
-                div.innerText = `Năm ${year}`;
-                div.onclick = () => openYearModal(year);
-                yearListDiv.appendChild(div);
+                const row = document.createElement('div');
+                row.className = 'year-row';
+
+                const item = document.createElement('div');
+                item.className = 'year-item';
+                item.innerText = `Năm ${year}`;
+                item.onclick = () => openYearModal(year);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-delete-year';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = `Xóa năm ${year}`;
+                delBtn.onclick = (e) => deleteYear(year, e);
+
+                row.appendChild(item);
+                row.appendChild(delBtn);
+                yearListDiv.appendChild(row);
             });
         }
 
-        function addYear() {
-            const year = prompt("Nhập năm muốn thêm (VD: 2024):");
+        function deleteYear(year, event) {
+            event.stopPropagation();
+            if (confirm(`⚠️ Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu của Năm ${year} không? Hành động này không thể hoàn tác.`)) {
+                delete appData.years[year];
+                saveData();
+                renderHome();
+            }
+        }
+
+        function openAddYearModal() {
+            document.getElementById('addYearModal').classList.add('active');
+            const input = document.getElementById('newYearInput');
+            input.value = '';
+            setTimeout(() => {
+                input.focus();
+            }, 100);
+        }
+
+        function confirmAddYear() {
+            const input = document.getElementById('newYearInput');
+            const year = input.value;
+            
             if (year && !isNaN(year)) {
                 if (!appData.years[year]) {
                     appData.years[year] = Array.from({length: 12}, () => ({eq: 0, e: 0, wq: 0, w: 0}));
                     saveData();
                     renderHome();
+                    closeModal('addYearModal');
                 } else {
                     alert("Năm này đã tồn tại!");
+                    input.focus();
                 }
+            } else {
+                alert("Vui lòng nhập năm hợp lệ!");
+                input.focus();
             }
         }
 
         // --- 3. MODAL NĂM ---
-        function openYearModal(year) {
+       function openYearModal(year) {
             currentEditingYear = year;
             document.getElementById('yearModalTitle').innerText = `Chi tiêu năm ${year}`;
             const tbody = document.getElementById('yearTableBody');
@@ -638,9 +800,19 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="month-col">T${index + 1}</td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td>
+                        <div class="flex-cell">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()">
+                            <button class="btn-auto btn-auto-elec" onclick="autoCalculateElec(this)" title="Tự động tính điện từ số tiền">⚡</button>
+                        </div>
+                    </td>
                     <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-input col-elec" value="${monthData.e === 0 || !monthData.e ? '' : formatNumber(monthData.e)}" oninput="formatInput(this); calculateYearTotal()"></td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td>
+                        <div class="flex-cell">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()">
+                            <button class="btn-auto btn-auto-water" onclick="autoCalculateWater(this)" title="Tự động tính nước từ số tiền">💧</button>
+                        </div>
+                    </td>
                     <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-input col-water" value="${monthData.w === 0 || !monthData.w ? '' : formatNumber(monthData.w)}" oninput="formatInput(this); calculateYearTotal()"></td>
                 `;
                 tbody.appendChild(tr);
@@ -669,6 +841,88 @@
             document.getElementById('totalWaterQty').innerText = formatNumber(totalWq);
             document.getElementById('totalWater').innerText = formatNumber(totalW);
             document.getElementById('grandTotalYear').innerText = formatNumber(totalE + totalW);
+        }
+
+        function calculateKwhFromMoney(totalMoneyWithVat) {
+            if (!totalMoneyWithVat || totalMoneyWithVat <= 0) return 0;
+            let costBeforeVat = totalMoneyWithVat / 1.1;
+            let kwh = 0;
+
+            const tiers = [
+                { limit: 50, price: 1984 },
+                { limit: 50, price: 2050 },
+                { limit: 100, price: 2380 },
+                { limit: 100, price: 2998 },
+                { limit: 100, price: 3350 },
+                { limit: Infinity, price: 3460 }
+            ];
+
+            for (let tier of tiers) {
+                let maxCostForTier = tier.limit * tier.price;
+                if (costBeforeVat > maxCostForTier) {
+                    kwh += tier.limit;
+                    costBeforeVat -= maxCostForTier;
+                } else {
+                    kwh += costBeforeVat / tier.price;
+                    break;
+                }
+            }
+            return Math.round(kwh);
+        }
+
+        function autoCalculateElec(btn) {
+            const row = btn.closest('tr');
+            const moneyInput = row.querySelector('.elec-input');
+            const moneyValue = parseNumber(moneyInput.value);
+            
+            if (moneyValue > 0) {
+                const kwh = calculateKwhFromMoney(moneyValue);
+                const qtyInput = row.querySelector('.elec-qty');
+                qtyInput.value = formatNumber(kwh);
+                calculateYearTotal();
+            } else {
+                alert("Vui lòng nhập 'Tiền Điện' trước khi bấm tính tự động!");
+            }
+        }
+        
+        function calculateWaterFromMoney(totalMoney) {
+            if (!totalMoney || totalMoney <= 0) return 0;
+            let remainingMoney = totalMoney;
+            let cubicMeters = 0;
+
+            const tiers = [
+                { limit: 10, price: 10900 },
+                { limit: 10, price: 13500 },
+                { limit: 10, price: 18000 },
+                { limit: Infinity, price: 21500 }
+            ];
+
+            for (let tier of tiers) {
+                let maxCostForTier = tier.limit * tier.price;
+                if (remainingMoney > maxCostForTier) {
+                    cubicMeters += tier.limit;
+                    remainingMoney -= maxCostForTier;
+                } else {
+                    cubicMeters += remainingMoney / tier.price;
+                    break;
+                }
+            }
+            return Math.round(cubicMeters);
+        }
+
+        function autoCalculateWater(btn) {
+            const row = btn.closest('tr');
+            const moneyInput = row.querySelector('.water-input');
+            const moneyValue = parseNumber(moneyInput.value);
+            
+            if (moneyValue > 0) {
+                const waterM3 = calculateWaterFromMoney(moneyValue);
+                const qtyInput = row.querySelector('.water-qty');
+                qtyInput.value = formatNumber(waterM3);
+                calculateYearTotal();
+            } else {
+                alert("Vui lòng nhập 'Tiền Nước' trước khi bấm tính tự động!");
+            }
         }
 
         function saveYearData() {
@@ -753,7 +1007,51 @@
             document.getElementById('statsModal').classList.add('active');
         }
 
-        // --- 5. TÍNH NĂNG QUẢN LÝ ---
+        // --- 5. TÍNH NĂNG THỐNG KÊ LƯỚI THEO THÁNG DÙNG CHUNG ---
+        // type: 'e' (tiền điện), 'w' (tiền nước), 'eq' (số điện), 'wq' (số nước)
+        function openMonthlyGridStats(type, title) {
+            closeModal('statsModal');
+            document.getElementById('monthlyGridModal').classList.add('active');
+            document.getElementById('gridModalTitle').innerText = title;
+
+            const thead = document.getElementById('gridThead');
+            const tbody = document.getElementById('gridTbody');
+            
+            // Lấy danh sách các năm và sắp xếp Tăng Dần (từ trái sang phải)
+            const years = Object.keys(appData.years).sort((a, b) => a - b);
+            
+            // Xây dựng Header Tên cột
+            let headHtml = `<tr><th width="10%">Tháng</th>`;
+            years.forEach(year => {
+                headHtml += `<th>${year}</th>`;
+            });
+            headHtml += `</tr>`;
+            thead.innerHTML = headHtml;
+
+            // Xây dựng Tbody
+            tbody.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                let rowHtml = `<tr><td class="month-col">T${i + 1}</td>`;
+                years.forEach(year => {
+                    const monthData = appData.years[year][i];
+                    const val = (monthData && monthData[type]) ? monthData[type] : 0;
+                    
+                    // Chọn class màu hiển thị (điện -> đỏ nhạt, nước -> xanh dương nhạt)
+                    let tdClass = (type === 'e' || type === 'eq') ? 'col-elec' : 'col-water';
+                    
+                    rowHtml += `<td class="${tdClass}">${val > 0 ? formatNumber(val) : ''}</td>`;
+                });
+                rowHtml += `</tr>`;
+                tbody.innerHTML += rowHtml;
+            }
+        }
+
+        function backToStatsFromGrid() {
+            closeModal('monthlyGridModal');
+            openStatsModal();
+        }
+
+        // --- 6. TÍNH NĂNG QUẢN LÝ KHÁC ---
         function openManageModal() {
             document.getElementById('manageModal').classList.add('active');
         }
