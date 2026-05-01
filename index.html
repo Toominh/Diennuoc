@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Chi Tiêu Điện Nước</title>
     <style>
-        /* CSS: Giao diện Dark Mode Mới (Slate/Sky) */
+        /* CSS: Giao diện Dark Mode (Slate/Sky) */
         :root {
-            --bg-color: #0f172a;       /* Nền tổng thể */
-            --card-bg: #1e293b;        /* Nền thẻ/popup */
-            --text-main: #f8fafc;      /* Chữ chính */
-            --text-muted: #94a3b8;     /* Chữ phụ/nhạt */
-            --primary: #38bdf8;        /* Xanh dương sáng */
-            --primary-hover: #0284c7;  /* Xanh dương đậm */
-            --success: #34d399;        /* Xanh lá */
-            --danger: #f87171;         /* Đỏ */
-            --border: #334155;         /* Viền */
-            --header-bg: #0f172a;      /* Nền tiêu đề bảng */
-            --cell-bg: #1e293b;        /* Nền ô bảng lẻ */
-            --cell-alt: #162032;       /* Nền ô bảng chẵn */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+            --success: #34d399;
+            --danger: #f87171;
+            --border: #334155;
+            --header-bg: #0f172a;
+            --cell-bg: #1e293b;
+            --cell-alt: #162032;
         }
 
         * {
@@ -116,10 +116,6 @@
             border: 1px solid var(--primary);
         }
 
-        button.btn-outline:active {
-            background-color: rgba(56, 189, 248, 0.1);
-        }
-
         /* Menu Buttons inside Manager */
         .menu-btn {
             display: flex;
@@ -136,10 +132,6 @@
             border-radius: 8px;
         }
         
-        .menu-btn:active {
-            background-color: var(--border);
-        }
-
         .menu-divider {
             border: 0;
             height: 1px;
@@ -156,26 +148,22 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 15px;
-            opacity: 0;
-            transition: opacity 0.2s;
+            padding: 10px; /* Nhỏ lại xíu để có thêm không gian trên đt */
         }
 
         .modal-overlay.active {
             display: flex;
-            opacity: 1;
         }
 
         .modal-content {
             background-color: var(--card-bg);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
             border: 1px solid var(--border);
         }
 
@@ -186,6 +174,21 @@
             justify-content: space-between;
             align-items: center;
             background-color: var(--bg-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.5rem;
+            padding: 0 10px 0 0;
+            line-height: 1;
         }
 
         .modal-header h2 {
@@ -228,8 +231,8 @@
 
         th, td {
             border: 1px solid var(--border);
-            padding: 12px 5px;
-            font-size: 0.95rem;
+            padding: 10px 2px; /* Giảm padding để fit 5 cột */
+            font-size: 0.9rem; /* Chữ nhỏ lại xíu */
         }
 
         th {
@@ -238,13 +241,8 @@
             font-weight: 600;
         }
 
-        td {
-            background-color: var(--cell-bg);
-        }
-        
-        tr:nth-child(even) td {
-            background-color: var(--cell-alt);
-        }
+        td { background-color: var(--cell-bg); }
+        tr:nth-child(even) td { background-color: var(--cell-alt); }
 
         td.month-col {
             font-weight: bold;
@@ -257,10 +255,14 @@
             border: none;
             color: var(--text-main);
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             outline: none;
         }
+
+        /* Màu nền cho các cột điện/nước để dễ phân biệt */
+        .col-elec { color: #fca5a5; }
+        .col-water { color: #93c5fd; }
 
         .total-row td {
             background-color: #1e293b !important;
@@ -269,23 +271,31 @@
         }
 
         .grand-total-row td {
-            background-color: #064e3b !important; /* Xanh lá đậm */
+            background-color: #064e3b !important;
             color: var(--success) !important;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
         }
 
-        /* Stats Text */
+        /* Stats Component */
+        .stats-table-container {
+            margin-bottom: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
         .stat-box {
             background-color: var(--bg-color);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             border: 1px solid var(--border);
             text-align: center;
         }
-        .stat-title { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;}
-        .stat-value { font-size: 1.8rem; font-weight: bold; }
+        .stat-title { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px;}
+        .stat-value { font-size: 1.5rem; font-weight: bold; }
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
         .text-primary { color: var(--primary); }
@@ -330,16 +340,12 @@
                 <hr class="menu-divider">
                 
                 <button class="menu-btn" onclick="exportData()">📤 Xuất dữ liệu (JSON)</button>
-                <!-- Input ẩn để chọn file -->
                 <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
                 <button class="menu-btn" onclick="document.getElementById('importFile').click()">📥 Nhập dữ liệu (JSON)</button>
                 
                 <hr class="menu-divider">
 
                 <button class="menu-btn" style="color: var(--primary); border-color: var(--primary);" onclick="backupHTML()">💾 Sao lưu toàn bộ (HTML)</button>
-                <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 5px;">
-                    Tải về 1 file HTML chứa cả giao diện và dữ liệu hiện tại để cất trữ.
-                </p>
             </div>
         </div>
     </div>
@@ -348,16 +354,18 @@
     <div class="modal-overlay" id="yearModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="yearModalTitle">Năm 2024</h2>
+                <h2 id="yearModalTitle">Năm</h2>
                 <button class="close-btn" onclick="closeModal('yearModal')">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 10px;">
                 <table>
                     <thead>
                         <tr>
-                            <th width="15%">Tháng</th>
-                            <th width="42.5%">Tiền Điện</th>
-                            <th width="42.5%">Tiền Nước</th>
+                            <th width="10%">Tháng</th>
+                            <th width="15%">Số<br>Điện</th>
+                            <th width="30%">Tiền Điện</th>
+                            <th width="15%">Số<br>Nước</th>
+                            <th width="30%">Tiền Nước</th>
                         </tr>
                     </thead>
                     <tbody id="yearTableBody">
@@ -366,11 +374,13 @@
                     <tfoot>
                         <tr class="total-row">
                             <td>Tổng</td>
-                            <td id="totalElec">0</td>
-                            <td id="totalWater">0</td>
+                            <td id="totalElecQty" class="col-elec">0</td>
+                            <td id="totalElec" class="col-elec">0</td>
+                            <td id="totalWaterQty" class="col-water">0</td>
+                            <td id="totalWater" class="col-water">0</td>
                         </tr>
                         <tr class="grand-total-row">
-                            <td colspan="2" style="text-align: right; padding-right: 15px;">TỔNG CỘNG ĐIỆN NƯỚC</td>
+                            <td colspan="4" style="text-align: right; padding-right: 15px;">TỔNG CỘNG TIỀN:</td>
                             <td id="grandTotalYear">0</td>
                         </tr>
                     </tfoot>
@@ -386,7 +396,10 @@
     <div class="modal-overlay" id="advancesModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Quản Lý Tạm Ứng</h2>
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToManage('advancesModal')">⬅</button>
+                    <h2>Tạm Ứng</h2>
+                </div>
                 <button class="close-btn" onclick="closeModal('advancesModal')">&times;</button>
             </div>
             <div class="modal-body">
@@ -398,9 +411,7 @@
                             <th width="45%">Số tiền</th>
                         </tr>
                     </thead>
-                    <tbody id="advancesTableBody">
-                        <!-- Render các dòng tạm ứng -->
-                    </tbody>
+                    <tbody id="advancesTableBody"></tbody>
                     <tfoot>
                         <tr class="total-row">
                             <td colspan="2">Tổng cộng</td>
@@ -420,20 +431,44 @@
     <div class="modal-overlay" id="statsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Thống Kê Tổng Quát</h2>
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToManage('statsModal')">⬅</button>
+                    <h2>Thống Kê Tổng Quát</h2>
+                </div>
                 <button class="close-btn" onclick="closeModal('statsModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="stat-box">
-                    <div class="stat-title">Tổng Thu (Tạm ứng)</div>
-                    <div class="stat-value text-success" id="statTotalIncome">0 ₫</div>
+                <!-- Bảng thống kê từng năm -->
+                <div class="stats-table-container">
+                    <table>
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th>Năm</th>
+                                <th>Tổng Điện</th>
+                                <th>Tổng Nước</th>
+                                <th>Tổng Cộng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBody">
+                            <!-- Render JS -->
+                        </tbody>
+                    </table>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-title">Tổng Chi (Điện + Nước)</div>
-                    <div class="stat-value text-danger" id="statTotalExpense">0 ₫</div>
+
+                <!-- Các khối tổng kết chung -->
+                <div style="display: flex; gap: 10px;">
+                    <div class="stat-box" style="flex: 1;">
+                        <div class="stat-title">Tổng Thu (Tạm ứng)</div>
+                        <div class="stat-value text-success" id="statTotalIncome">0 ₫</div>
+                    </div>
+                    <div class="stat-box" style="flex: 1;">
+                        <div class="stat-title">Tổng Chi (Điện+Nước)</div>
+                        <div class="stat-value text-danger" id="statTotalExpense">0 ₫</div>
+                    </div>
                 </div>
+                
                 <div class="stat-box" style="border-color: var(--primary);">
-                    <div class="stat-title">SỐ DƯ HIỆN TẠI</div>
+                    <div class="stat-title">SỐ DƯ HIỆN TẠI TẤT CẢ CÁC NĂM</div>
                     <div class="stat-value text-primary" id="statBalance">0 ₫</div>
                 </div>
             </div>
@@ -444,13 +479,11 @@
         // --- 1. QUẢN LÝ DỮ LIỆU ---
         let appData = { years: {}, advances: [] };
 
-        // Khôi phục dữ liệu (Ưu tiên đọc từ script nhúng nếu là file backup HTML)
         function initData() {
             const backupScript = document.getElementById('backupData');
             if (backupScript && backupScript.textContent) {
                 try {
                     appData = JSON.parse(backupScript.textContent);
-                    // Lưu đè lại vào local storage để dùng tiếp
                     localStorage.setItem('chiTieuData', JSON.stringify(appData));
                 } catch(e) {}
             } else {
@@ -478,7 +511,6 @@
         function renderHome() {
             const yearListDiv = document.getElementById('yearList');
             yearListDiv.innerHTML = '';
-            
             const years = Object.keys(appData.years).sort((a, b) => b - a);
             
             if (years.length === 0) {
@@ -499,7 +531,8 @@
             const year = prompt("Nhập năm muốn thêm (VD: 2024):");
             if (year && !isNaN(year)) {
                 if (!appData.years[year]) {
-                    appData.years[year] = Array.from({length: 12}, () => ({e: 0, w: 0}));
+                    // Cấu trúc mới: eq (số điện), e (tiền điện), wq (số nước), w (tiền nước)
+                    appData.years[year] = Array.from({length: 12}, () => ({eq: 0, e: 0, wq: 0, w: 0}));
                     saveData();
                     renderHome();
                 } else {
@@ -508,7 +541,7 @@
             }
         }
 
-        // --- 3. MODAL NĂM ---
+        // --- 3. MODAL NĂM (5 CỘT) ---
         function openYearModal(year) {
             currentEditingYear = year;
             document.getElementById('yearModalTitle').innerText = `Chi tiêu năm ${year}`;
@@ -520,13 +553,15 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="month-col">T${index + 1}</td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-input" value="${monthData.e === 0 ? '' : formatNumber(monthData.e)}" oninput="formatInput(this); calculateYearTotal()"></td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-input" value="${monthData.w === 0 ? '' : formatNumber(monthData.w)}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-input col-elec" value="${monthData.e === 0 || !monthData.e ? '' : formatNumber(monthData.e)}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-input col-water" value="${monthData.w === 0 || !monthData.w ? '' : formatNumber(monthData.w)}" oninput="formatInput(this); calculateYearTotal()"></td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            calculateYearTotal(); // Tính toán tổng ngay khi mở
+            calculateYearTotal();
             document.getElementById('yearModal').classList.add('active');
         }
 
@@ -540,32 +575,40 @@
         }
 
         function calculateYearTotal() {
-            let totalE = 0;
-            let totalW = 0;
+            let totalEq = 0, totalE = 0, totalWq = 0, totalW = 0;
             
+            document.querySelectorAll('.elec-qty').forEach(input => totalEq += parseNumber(input.value));
             document.querySelectorAll('.elec-input').forEach(input => totalE += parseNumber(input.value));
+            document.querySelectorAll('.water-qty').forEach(input => totalWq += parseNumber(input.value));
             document.querySelectorAll('.water-input').forEach(input => totalW += parseNumber(input.value));
 
+            document.getElementById('totalElecQty').innerText = formatNumber(totalEq);
             document.getElementById('totalElec').innerText = formatNumber(totalE);
+            document.getElementById('totalWaterQty').innerText = formatNumber(totalWq);
             document.getElementById('totalWater').innerText = formatNumber(totalW);
+            
             document.getElementById('grandTotalYear').innerText = formatNumber(totalE + totalW);
         }
 
         function saveYearData() {
+            const elecQtys = document.querySelectorAll('.elec-qty');
             const elecInputs = document.querySelectorAll('.elec-input');
+            const waterQtys = document.querySelectorAll('.water-qty');
             const waterInputs = document.querySelectorAll('.water-input');
             
             const newData = [];
             for(let i = 0; i < 12; i++) {
                 newData.push({
+                    eq: parseNumber(elecQtys[i].value),
                     e: parseNumber(elecInputs[i].value),
+                    wq: parseNumber(waterQtys[i].value),
                     w: parseNumber(waterInputs[i].value)
                 });
             }
             
             appData.years[currentEditingYear] = newData;
             saveData();
-            closeModal('yearModal'); // Đóng thẳng popup, không hiện alert
+            closeModal('yearModal');
         }
 
         // --- 4. TẠM ỨNG & THỐNG KÊ ---
@@ -590,7 +633,7 @@
 
         function addAdvanceRow() {
             appData.advances.push({date: '', amount: 0});
-            openAdvancesModal(); // Render lại
+            openAdvancesModal();
         }
 
         function calculateAdvanceTotal() {
@@ -610,22 +653,47 @@
                     newAdvances.push({ date: dates[i].value, amount: amt });
                 }
             }
-            
             appData.advances = newAdvances;
             saveData();
             closeModal('advancesModal');
         }
 
         function openStatsModal() {
-            let tongThu = appData.advances.reduce((sum, item) => sum + item.amount, 0);
-            let tongChi = 0;
-            for (const year in appData.years) {
-                appData.years[year].forEach(month => tongChi += month.e + month.w);
-            }
+            // Render bảng thống kê chi tiết theo năm
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = '';
+            let tongChiTatCa = 0;
+            
+            const sortedYears = Object.keys(appData.years).sort((a, b) => b - a);
+            
+            sortedYears.forEach(year => {
+                let sumE = 0;
+                let sumW = 0;
+                appData.years[year].forEach(month => {
+                    sumE += (month.e || 0);
+                    sumW += (month.w || 0);
+                });
+                
+                let sumYear = sumE + sumW;
+                tongChiTatCa += sumYear;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="month-col">${year}</td>
+                        <td class="col-elec">${formatNumber(sumE)}</td>
+                        <td class="col-water">${formatNumber(sumW)}</td>
+                        <td class="text-success" style="font-weight:bold">${formatNumber(sumYear)}</td>
+                    </tr>
+                `;
+            });
 
+            // Tính tổng thu
+            let tongThu = appData.advances.reduce((sum, item) => sum + item.amount, 0);
+
+            // Gán dữ liệu cho các khối dưới
             document.getElementById('statTotalIncome').innerText = formatNumber(tongThu) + " ₫";
-            document.getElementById('statTotalExpense').innerText = formatNumber(tongChi) + " ₫";
-            document.getElementById('statBalance').innerText = formatNumber(tongThu - tongChi) + " ₫";
+            document.getElementById('statTotalExpense').innerText = formatNumber(tongChiTatCa) + " ₫";
+            document.getElementById('statBalance').innerText = formatNumber(tongThu - tongChiTatCa) + " ₫";
 
             document.getElementById('statsModal').classList.add('active');
         }
@@ -641,7 +709,11 @@
             if(modalId === 'statsModal') openStatsModal();
         }
 
-        // 5.1. Xuất dữ liệu
+        function backToManage(currentModalId) {
+            closeModal(currentModalId);
+            openManageModal();
+        }
+
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
             const a = document.createElement('a');
@@ -652,7 +724,6 @@
             a.remove();
         }
 
-        // 5.2. Nhập dữ liệu
         function importData(event) {
             const file = event.target.files[0];
             if (file) {
@@ -675,15 +746,12 @@
                 };
                 reader.readAsText(file);
             }
-            event.target.value = ''; // Reset
+            event.target.value = '';
         }
 
-        // 5.3. Sao lưu HTML
         function backupHTML() {
-            closeModal('manageModal'); // Đóng popup để HTML lưu lại không bị hiển thị lớp mờ đen
-            
+            closeModal('manageModal'); 
             setTimeout(() => {
-                // Nhúng dữ liệu hiện tại vào 1 thẻ script để khi mở file html lên nó tự nhận diện
                 let dataScript = document.getElementById('backupData');
                 if(!dataScript) {
                     dataScript = document.createElement('script');
@@ -693,10 +761,7 @@
                 }
                 dataScript.textContent = JSON.stringify(appData);
 
-                // Lấy toàn bộ mã HTML của trang
                 const htmlContent = "<!DOCTYPE html>\n<html lang=\"vi\">\n" + document.documentElement.innerHTML + "\n</html>";
-                
-                // Tạo file và tải về
                 const blob = new Blob([htmlContent], {type: "text/html;charset=utf-8"});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -712,7 +777,6 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // Bấm ra ngoài vùng mờ để đóng popup
         window.onclick = function(event) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.classList.remove('active');
