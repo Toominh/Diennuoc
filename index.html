@@ -799,21 +799,25 @@
             appData.years[year].forEach((monthData, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="month-col">T${index + 1}</td>
+                    <td class="month-col">
+                    ${index + 1}
+                    </td>
                     <td>
                         <div class="flex-cell">
                             <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()">
-                            <button class="btn-auto btn-auto-elec" onclick="autoCalculateElec(this)" title="Tự động tính điện từ số tiền">⚡</button>
                         </div>
                     </td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-input col-elec" value="${monthData.e === 0 || !monthData.e ? '' : formatNumber(monthData.e)}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-input col-elec" value="${monthData.e === 0 || !monthData.e ? '' : formatNumber(monthData.e)}" oninput="handleElecInput(this)">
+                    </td>
                     <td>
                         <div class="flex-cell">
                             <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()">
-                            <button class="btn-auto btn-auto-water" onclick="autoCalculateWater(this)" title="Tự động tính nước từ số tiền">💧</button>
                         </div>
                     </td>
-                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-input col-water" value="${monthData.w === 0 || !monthData.w ? '' : formatNumber(monthData.w)}" oninput="formatInput(this); calculateYearTotal()"></td>
+                    <td>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-input col-water" value="${monthData.w === 0 || !monthData.w ? '' : formatNumber(monthData.w)}" oninput="handleWaterInput(this)">
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -843,6 +847,52 @@
             document.getElementById('grandTotalYear').innerText = formatNumber(totalE + totalW);
         }
 
+        function handleElecInput(input) {
+            // 1. Định dạng số khi nhập (thêm dấu chấm)
+            formatInput(input);
+            
+            // 2. Lấy giá trị vừa nhập (ví dụ nhập 100 thì lấy 100)
+            const moneyValue = parseNumber(input.value);
+            
+            const row = input.closest('tr');
+            const qtyInput = row.querySelector('.elec-qty');
+            
+            // 3. Nhân 1000 và tính số điện
+            if (moneyValue > 0) {
+                const actualMoney = moneyValue * 1000; // Tự động nhân 1000
+                const kwh = calculateKwhFromMoney(actualMoney);
+                qtyInput.value = formatNumber(kwh);
+            } else {
+                qtyInput.value = ''; // Nếu xóa hết tiền thì xóa luôn số điện
+            }
+            
+            // 4. Tính lại tổng cộng dưới chân bảng
+            calculateYearTotal();
+        }
+
+        function handleWaterInput(input) {
+            // 1. Định dạng số khi nhập (thêm dấu chấm)
+            formatInput(input);
+            
+            // 2. Lấy giá trị vừa nhập
+            const moneyValue = parseNumber(input.value);
+            
+            const row = input.closest('tr');
+            const qtyInput = row.querySelector('.water-qty');
+            
+            // 3. Nhân 1000 và tính số nước
+            if (moneyValue > 0) {
+                const actualMoney = moneyValue * 1000; // Tự động nhân 1000
+                const waterM3 = calculateWaterFromMoney(actualMoney);
+                qtyInput.value = formatNumber(waterM3);
+            } else {
+                qtyInput.value = ''; // Nếu xóa hết tiền thì xóa luôn số nước
+            }
+            
+            // 4. Tính lại tổng cộng dưới chân bảng
+            calculateYearTotal();
+        }
+
         function calculateKwhFromMoney(totalMoneyWithVat) {
             if (!totalMoneyWithVat || totalMoneyWithVat <= 0) return 0;
             let costBeforeVat = totalMoneyWithVat / 1.1;
@@ -870,20 +920,7 @@
             return Math.round(kwh);
         }
 
-        function autoCalculateElec(btn) {
-            const row = btn.closest('tr');
-            const moneyInput = row.querySelector('.elec-input');
-            const moneyValue = parseNumber(moneyInput.value);
-            
-            if (moneyValue > 0) {
-                const kwh = calculateKwhFromMoney(moneyValue);
-                const qtyInput = row.querySelector('.elec-qty');
-                qtyInput.value = formatNumber(kwh);
-                calculateYearTotal();
-            } else {
-                alert("Vui lòng nhập 'Tiền Điện' trước khi bấm tính tự động!");
-            }
-        }
+
         
         function calculateWaterFromMoney(totalMoney) {
             if (!totalMoney || totalMoney <= 0) return 0;
@@ -910,20 +947,7 @@
             return Math.round(cubicMeters);
         }
 
-        function autoCalculateWater(btn) {
-            const row = btn.closest('tr');
-            const moneyInput = row.querySelector('.water-input');
-            const moneyValue = parseNumber(moneyInput.value);
-            
-            if (moneyValue > 0) {
-                const waterM3 = calculateWaterFromMoney(moneyValue);
-                const qtyInput = row.querySelector('.water-qty');
-                qtyInput.value = formatNumber(waterM3);
-                calculateYearTotal();
-            } else {
-                alert("Vui lòng nhập 'Tiền Nước' trước khi bấm tính tự động!");
-            }
-        }
+
 
         function saveYearData() {
             const elecQtys = document.querySelectorAll('.elec-qty');
@@ -942,6 +966,13 @@
             closeModal('yearModal');
         }
 
+        // Hàm chuyển "YYYY-MM-DD" thành "DD/MM/YYYY" hiển thị cho đẹp
+        function formatVNDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return dateStr;
+        }
         // --- 4. TẠM ỨNG & THỐNG KÊ ---
         function openAdvancesModal() {
             const tbody = document.getElementById('advancesTableBody');
@@ -951,7 +982,15 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="month-col">${index + 1}</td>
-                    <td><input type="date" class="adv-date" value="${adv.date}"></td>
+                    <td>
+                        <!-- Thẻ hiển thị định dạng số DD/MM/YYYY -->
+                        <input type="text" value="${formatVNDate(adv.date)}" placeholder="dd/mm/yyyy" readonly style="cursor: pointer;"
+                               onfocus="this.style.display='none'; this.nextElementSibling.style.display=''; this.nextElementSibling.focus();">
+                        
+                        <!-- Thẻ chọn ngày thực tế của hệ thống (bị ẩn) -->
+                        <input type="date" class="adv-date" value="${adv.date}" style="display:none;" 
+                               onblur="this.style.display='none'; this.previousElementSibling.style.display=''; this.previousElementSibling.value=formatVNDate(this.value);">
+                    </td>
                     <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="adv-amount" value="${adv.amount === 0 ? '' : formatNumber(adv.amount)}" oninput="formatInput(this); calculateAdvanceTotal()"></td>
                 `;
                 tbody.appendChild(tr);
@@ -1017,8 +1056,8 @@
             const thead = document.getElementById('gridThead');
             const tbody = document.getElementById('gridTbody');
             
-            // Lấy danh sách các năm và sắp xếp Tăng Dần (từ trái sang phải)
-            const years = Object.keys(appData.years).sort((a, b) => a - b);
+            // Đã sửa: Sắp xếp Giảm Dần (b - a) để năm mới nhất ở bên trái
+            const years = Object.keys(appData.years).sort((a, b) => b - a);
             
             // Xây dựng Header Tên cột
             let headHtml = `<tr><th width="10%">Tháng</th>`;
@@ -1036,7 +1075,6 @@
                     const monthData = appData.years[year][i];
                     const val = (monthData && monthData[type]) ? monthData[type] : 0;
                     
-                    // Chọn class màu hiển thị (điện -> đỏ nhạt, nước -> xanh dương nhạt)
                     let tdClass = (type === 'e' || type === 'eq') ? 'col-elec' : 'col-water';
                     
                     rowHtml += `<td class="${tdClass}">${val > 0 ? formatNumber(val) : ''}</td>`;
