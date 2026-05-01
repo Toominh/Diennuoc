@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Chi Tiêu Điện Nước</title>
+    <style>
+        /* CSS: Giao diện Dark Mode hiện đại */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --primary: #bb86fc;
+            --primary-hover: #9965f4;
+            --success: #03dac6;
+            --danger: #cf6679;
+            --border: #333333;
+            --header-blue: #1a3b5c;
+            --cell-green: #1e4d3b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 70px; /* Space for fixed footer */
+        }
+
+        /* Header */
+        header {
+            padding: 20px;
+            text-align: center;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        /* Danh sách năm (Home Page) */
+        .container {
+            padding: 15px;
+        }
+
+        .year-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .year-item {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .year-item:active {
+            transform: scale(0.98);
+        }
+
+        /* Footer Buttons */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        button:active {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        /* Modals (Popups) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Tables inside modals */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 5px;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: var(--header-blue);
+            color: var(--text-main);
+        }
+
+        td {
+            background-color: var(--cell-green);
+        }
+        
+        td.month-col {
+            background-color: var(--card-bg);
+            font-weight: bold;
+        }
+
+        input[type="number"], input[type="text"], input[type="date"] {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: bold;
+            outline: none;
+        }
+
+        /* Ẩn mũi tên của thẻ input number */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .total-row td {
+            background-color: #3e2723 !important; /* Brown-ish for total */
+            font-weight: bold;
+            color: #ffb300;
+        }
+
+        /* Stats Text */
+        .stat-box {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+        .stat-title { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px;}
+        .stat-value { font-size: 1.5rem; font-weight: bold; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-primary { color: var(--primary); }
+
+        .btn-add-row {
+            background-color: var(--header-blue);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SỔ CHI TIÊU ĐIỆN NƯỚC</h1>
+    </header>
+
+    <div class="container">
+        <div class="year-list" id="yearList">
+            <!-- Render danh sách năm bằng JS -->
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <button class="btn-outline" onclick="addYear()">+ Thêm năm</button>
+        <button onclick="openAdvancesModal()">Tạm ứng</button>
+        <button onclick="openStatsModal()">Thống kê</button>
+    </div>
+
+    <!-- Modal: Chi tiết Năm -->
+    <div class="modal-overlay" id="yearModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="yearModalTitle">Năm 2024</h2>
+                <button class="close-btn" onclick="closeModal('yearModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="20%">Tháng</th>
+                            <th width="40%">Tiền Điện</th>
+                            <th width="40%">Tiền Nước</th>
+                        </tr>
+                    </thead>
+                    <tbody id="yearTableBody">
+                        <!-- Render 12 tháng -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td>Tổng</td>
+                            <td id="totalElec">0</td>
+                            <td id="totalWater">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveYearData()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Tạm ứng -->
+    <div class="modal-overlay" id="advancesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quản Lý Tạm Ứng</h2>
+                <button class="close-btn" onclick="closeModal('advancesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">STT</th>
+                            <th width="40%">Ngày</th>
+                            <th width="45%">Số tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="advancesTableBody">
+                        <!-- Render các dòng tạm ứng -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="2">Tổng cộng</td>
+                            <td id="totalAdvance">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add-row" onclick="addAdvanceRow()">+ Thêm hàng</button>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveAdvancesData()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Thống kê -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Thống Kê Tổng Quát</h2>
+                <button class="close-btn" onclick="closeModal('statsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stat-box">
+                    <div class="stat-title">Tổng Thu (Tạm ứng)</div>
+                    <div class="stat-value text-success" id="statTotalIncome">0 ₫</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-title">Tổng Chi (Điện + Nước tất cả các năm)</div>
+                    <div class="stat-value text-danger" id="statTotalExpense">0 ₫</div>
+                </div>
+                <div class="stat-box" style="border-color: var(--primary);">
+                    <div class="stat-title">SỐ DƯ HIỆN TẠI</div>
+                    <div class="stat-value text-primary" id="statBalance">0 ₫</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUẢN LÝ DỮ LIỆU (Local Storage) ---
+        let appData = JSON.parse(localStorage.getItem('chiTieuData')) || {
+            years: {}, // Format: { "2024": [{e: 0, w: 0}, ... 12 items] }
+            advances: [] // Format: [{date: '2024-05-01', amount: 1000000}]
+        };
+
+        let currentEditingYear = null;
+
+        // Hàm format số tiền (VND): 1000000 -> 1.000.000
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Hàm bỏ format để tính toán: 1.000.000 -> 1000000
+        function parseNumber(str) {
+            if (!str) return 0;
+            return parseInt(str.toString().replace(/\./g, '')) || 0;
+        }
+
+        // Lưu dữ liệu vào LocalStorage
+        function saveData() {
+            localStorage.setItem('chiTieuData', JSON.stringify(appData));
+        }
+
+        // --- 2. RENDER TRANG CHỦ ---
+        function renderHome() {
+            const yearListDiv = document.getElementById('yearList');
+            yearListDiv.innerHTML = '';
+            
+            const years = Object.keys(appData.years).sort((a, b) => b - a); // Sắp xếp năm mới nhất lên đầu
+            
+            if (years.length === 0) {
+                yearListDiv.innerHTML = '<p style="text-align:center; color: var(--text-muted); margin-top: 50px;">Chưa có dữ liệu năm nào.<br>Hãy bấm "Thêm năm" ở dưới.</p>';
+                return;
+            }
+
+            years.forEach(year => {
+                const div = document.createElement('div');
+                div.className = 'year-item';
+                div.innerText = `Năm ${year}`;
+                div.onclick = () => openYearModal(year);
+                yearListDiv.appendChild(div);
+            });
+        }
+
+        function addYear() {
+            const year = prompt("Nhập năm muốn thêm (VD: 2024):");
+            if (year && !isNaN(year)) {
+                if (!appData.years[year]) {
+                    // Khởi tạo 12 tháng bằng 0
+                    appData.years[year] = Array.from({length: 12}, () => ({e: 0, w: 0}));
+                    saveData();
+                    renderHome();
+                } else {
+                    alert("Năm này đã tồn tại!");
+                }
+            }
+        }
+
+        // --- 3. MODAL NĂM (ĐIỆN / NƯỚC) ---
+        function openYearModal(year) {
+            currentEditingYear = year;
+            document.getElementById('yearModalTitle').innerText = `Chi tiêu năm ${year}`;
+            
+            const tbody = document.getElementById('yearTableBody');
+            tbody.innerHTML = '';
+            
+            let totalE = 0;
+            let totalW = 0;
+
+            appData.years[year].forEach((monthData, index) => {
+                const tr = document.createElement('tr');
+                
+                tr.innerHTML = `
+                    <td class="month-col">T${index + 1}</td>
+                    <td><input type="text" class="input-money elec-input" value="${monthData.e === 0 ? '' : formatNumber(monthData.e)}" onkeyup="formatInput(this); calculateYearTotal()"></td>
+                    <td><input type="text" class="input-money water-input" value="${monthData.w === 0 ? '' : formatNumber(monthData.w)}" onkeyup="formatInput(this); calculateYearTotal()"></td>
+                `;
+                tbody.appendChild(tr);
+                totalE += monthData.e;
+                totalW += monthData.w;
+            });
+
+            document.getElementById('totalElec').innerText = formatNumber(totalE);
+            document.getElementById('totalWater').innerText = formatNumber(totalW);
+
+            document.getElementById('yearModal').classList.add('active');
+        }
+
+        function formatInput(input) {
+            // Lấy giá trị hiện tại, loại bỏ ký tự không phải số, và format lại
+            let val = parseNumber(input.value);
+            if (val === 0 && input.value.trim() === '') {
+                input.value = '';
+            } else {
+                input.value = formatNumber(val);
+            }
+        }
+
+        function calculateYearTotal() {
+            let totalE = 0;
+            let totalW = 0;
+            
+            document.querySelectorAll('.elec-input').forEach(input => {
+                totalE += parseNumber(input.value);
+            });
+            document.querySelectorAll('.water-input').forEach(input => {
+                totalW += parseNumber(input.value);
+            });
+
+            document.getElementById('totalElec').innerText = formatNumber(totalE);
+            document.getElementById('totalWater').innerText = formatNumber(totalW);
+        }
+
+        function saveYearData() {
+            const elecInputs = document.querySelectorAll('.elec-input');
+            const waterInputs = document.querySelectorAll('.water-input');
+            
+            const newData = [];
+            for(let i = 0; i < 12; i++) {
+                newData.push({
+                    e: parseNumber(elecInputs[i].value),
+                    w: parseNumber(waterInputs[i].value)
+                });
+            }
+            
+            appData.years[currentEditingYear] = newData;
+            saveData();
+            closeModal('yearModal');
+            alert("Đã cập nhật thành công!");
+        }
+
+        // --- 4. MODAL TẠM ỨNG ---
+        function openAdvancesModal() {
+            renderAdvancesTable();
+            document.getElementById('advancesModal').classList.add('active');
+        }
+
+        function renderAdvancesTable() {
+            const tbody = document.getElementById('advancesTableBody');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            if (appData.advances.length === 0) {
+                appData.advances.push({date: '', amount: 0}); // Mặc định 1 dòng trống
+            }
+
+            appData.advances.forEach((adv, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="month-col">${index + 1}</td>
+                    <td><input type="date" class="adv-date" value="${adv.date}"></td>
+                    <td><input type="text" class="input-money adv-amount" value="${adv.amount === 0 ? '' : formatNumber(adv.amount)}" onkeyup="formatInput(this); calculateAdvanceTotal()"></td>
+                `;
+                tbody.appendChild(tr);
+                total += adv.amount;
+            });
+
+            document.getElementById('totalAdvance').innerText = formatNumber(total);
+        }
+
+        function addAdvanceRow() {
+            appData.advances.push({date: '', amount: 0});
+            renderAdvancesTable();
+        }
+
+        function calculateAdvanceTotal() {
+            let total = 0;
+            document.querySelectorAll('.adv-amount').forEach(input => {
+                total += parseNumber(input.value);
+            });
+            document.getElementById('totalAdvance').innerText = formatNumber(total);
+        }
+
+        function saveAdvancesData() {
+            const dates = document.querySelectorAll('.adv-date');
+            const amounts = document.querySelectorAll('.adv-amount');
+            
+            const newAdvances = [];
+            for(let i = 0; i < dates.length; i++) {
+                // Chỉ lưu những dòng có nhập tiền hoặc ngày
+                let amt = parseNumber(amounts[i].value);
+                if(amt > 0 || dates[i].value !== '') {
+                    newAdvances.push({
+                        date: dates[i].value,
+                        amount: amt
+                    });
+                }
+            }
+            
+            appData.advances = newAdvances;
+            saveData();
+            closeModal('advancesModal');
+            alert("Đã cập nhật tạm ứng!");
+        }
+
+        // --- 5. MODAL THỐNG KÊ ---
+        function openStatsModal() {
+            // Tính tổng thu
+            let tongThu = appData.advances.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Tính tổng chi
+            let tongChi = 0;
+            for (const year in appData.years) {
+                appData.years[year].forEach(month => {
+                    tongChi += month.e + month.w;
+                });
+            }
+
+            // Tính số dư
+            let soDu = tongThu - tongChi;
+
+            document.getElementById('statTotalIncome').innerText = formatNumber(tongThu) + " ₫";
+            document.getElementById('statTotalExpense').innerText = formatNumber(tongChi) + " ₫";
+            document.getElementById('statBalance').innerText = formatNumber(soDu) + " ₫";
+
+            document.getElementById('statsModal').classList.add('active');
+        }
+
+        // --- 6. TIỆN ÍCH ---
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Đóng modal khi click ra ngoài vùng mờ
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Khởi chạy khi load trang
+        renderHome();
+    </script>
+</body>
+</html>
