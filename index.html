@@ -148,7 +148,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 10px; /* Nhỏ lại xíu để có thêm không gian trên đt */
+            padding: 10px;
         }
 
         .modal-overlay.active {
@@ -231,8 +231,8 @@
 
         th, td {
             border: 1px solid var(--border);
-            padding: 10px 2px; /* Giảm padding để fit 5 cột */
-            font-size: 0.9rem; /* Chữ nhỏ lại xíu */
+            padding: 10px 2px;
+            font-size: 0.9rem;
         }
 
         th {
@@ -243,6 +243,22 @@
 
         td { background-color: var(--cell-bg); }
         tr:nth-child(even) td { background-color: var(--cell-alt); }
+
+        .price-table td {
+            text-align: left;
+            padding-left: 10px;
+        }
+        .price-table td:last-child {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .price-table .group-title {
+            background-color: var(--border);
+            font-weight: bold;
+            color: var(--success);
+            padding: 8px;
+        }
 
         td.month-col {
             font-weight: bold;
@@ -260,7 +276,6 @@
             outline: none;
         }
 
-        /* Màu nền cho các cột điện/nước để dễ phân biệt */
         .col-elec { color: #fca5a5; }
         .col-water { color: #93c5fd; }
 
@@ -277,7 +292,6 @@
             font-weight: bold;
         }
 
-        /* Stats Component */
         .stats-table-container {
             margin-bottom: 20px;
             max-height: 250px;
@@ -334,6 +348,8 @@
                 <button class="close-btn" onclick="closeModal('manageModal')">&times;</button>
             </div>
             <div class="modal-body">
+                <button class="menu-btn" onclick="openFromManage('priceElecModal')">⚡ Giá điện sinh hoạt <span>&rarr;</span></button>
+                <button class="menu-btn" onclick="openFromManage('priceWaterModal')">💧 Giá nước sinh hoạt <span>&rarr;</span></button>
                 <button class="menu-btn" onclick="openFromManage('advancesModal')">💰 Tạm ứng <span>&rarr;</span></button>
                 <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button>
                 
@@ -346,6 +362,85 @@
                 <hr class="menu-divider">
 
                 <button class="menu-btn" style="color: var(--primary); border-color: var(--primary);" onclick="backupHTML()">💾 Sao lưu toàn bộ (HTML)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Giá Điện -->
+    <div class="modal-overlay" id="priceElecModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToManage('priceElecModal')">⬅</button>
+                    <h2>Giá Điện Sinh Hoạt</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal('priceElecModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">Bậc</th>
+                            <th width="50%">Mức sử dụng (kWh)</th>
+                            <th width="35%">Giá bán (đ/kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>0 - 50</td><td>1.984</td></tr>
+                        <tr><td>2</td><td>51 - 100</td><td>2.050</td></tr>
+                        <tr><td>3</td><td>101 - 200</td><td>2.380</td></tr>
+                        <tr><td>4</td><td>201 - 300</td><td>2.998</td></tr>
+                        <tr><td>5</td><td>301 - 400</td><td>3.350</td></tr>
+                        <tr><td>6</td><td>Từ 401 trở lên</td><td>3.460</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; line-height: 1.4;">
+                    * Giá chưa bao gồm thuế GTGT. Áp dụng cho hộ dân cư theo quy định hiện hành.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Giá Nước -->
+    <div class="modal-overlay" id="priceWaterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="backToManage('priceWaterModal')">⬅</button>
+                    <h2>Giá Nước Sạch</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal('priceWaterModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>Nội dung sử dụng</th>
+                            <th width="35%">Giá bán (đ/m³)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="2" class="group-title">1. Hộ dân cư khu vực ĐÔ THỊ</td></tr>
+                        <tr><td>Mức đến 10 m³/tháng</td><td>10.900</td></tr>
+                        <tr><td>Từ trên 10 - 20 m³</td><td>13.500</td></tr>
+                        <tr><td>Từ trên 20 - 30 m³</td><td>18.000</td></tr>
+                        <tr><td>Trên 30 m³</td><td>21.500</td></tr>
+                        
+                        <tr><td colspan="2" class="group-title">2. Hộ dân cư khu vực NÔNG THÔN</td></tr>
+                        <tr><td>Mức đến 10 m³/tháng</td><td>9.000</td></tr>
+                        <tr><td>Từ trên 10 - 20 m³</td><td>11.500</td></tr>
+                        <tr><td>Từ trên 20 - 30 m³</td><td>15.000</td></tr>
+                        <tr><td>Trên 30 m³</td><td>18.000</td></tr>
+
+                        <tr><td colspan="2" class="group-title">3. Đối tượng khác</td></tr>
+                        <tr><td>Cơ quan hành chính, Sự nghiệp</td><td>16.300</td></tr>
+                        <tr><td>Tổ chức, cá nhân Sản xuất</td><td>18.300</td></tr>
+                        <tr><td>Tổ chức, cá nhân Kinh doanh</td><td>21.800</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; line-height: 1.4;">
+                    * Giá bán lẻ nước sạch sinh hoạt đã bao gồm thuế GTGT.
+                </p>
             </div>
         </div>
     </div>
@@ -368,9 +463,7 @@
                             <th width="30%">Tiền Nước</th>
                         </tr>
                     </thead>
-                    <tbody id="yearTableBody">
-                        <!-- Render 12 tháng -->
-                    </tbody>
+                    <tbody id="yearTableBody"></tbody>
                     <tfoot>
                         <tr class="total-row">
                             <td>Tổng</td>
@@ -438,7 +531,6 @@
                 <button class="close-btn" onclick="closeModal('statsModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Bảng thống kê từng năm -->
                 <div class="stats-table-container">
                     <table>
                         <thead style="position: sticky; top: 0;">
@@ -449,13 +541,9 @@
                                 <th>Tổng Cộng</th>
                             </tr>
                         </thead>
-                        <tbody id="statsTableBody">
-                            <!-- Render JS -->
-                        </tbody>
+                        <tbody id="statsTableBody"></tbody>
                     </table>
                 </div>
-
-                <!-- Các khối tổng kết chung -->
                 <div style="display: flex; gap: 10px;">
                     <div class="stat-box" style="flex: 1;">
                         <div class="stat-title">Tổng Thu (Tạm ứng)</div>
@@ -466,7 +554,6 @@
                         <div class="stat-value text-danger" id="statTotalExpense">0 ₫</div>
                     </div>
                 </div>
-                
                 <div class="stat-box" style="border-color: var(--primary);">
                     <div class="stat-title">SỐ DƯ HIỆN TẠI TẤT CẢ CÁC NĂM</div>
                     <div class="stat-value text-primary" id="statBalance">0 ₫</div>
@@ -531,7 +618,6 @@
             const year = prompt("Nhập năm muốn thêm (VD: 2024):");
             if (year && !isNaN(year)) {
                 if (!appData.years[year]) {
-                    // Cấu trúc mới: eq (số điện), e (tiền điện), wq (số nước), w (tiền nước)
                     appData.years[year] = Array.from({length: 12}, () => ({eq: 0, e: 0, wq: 0, w: 0}));
                     saveData();
                     renderHome();
@@ -541,11 +627,10 @@
             }
         }
 
-        // --- 3. MODAL NĂM (5 CỘT) ---
+        // --- 3. MODAL NĂM ---
         function openYearModal(year) {
             currentEditingYear = year;
             document.getElementById('yearModalTitle').innerText = `Chi tiêu năm ${year}`;
-            
             const tbody = document.getElementById('yearTableBody');
             tbody.innerHTML = '';
             
@@ -560,7 +645,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-
             calculateYearTotal();
             document.getElementById('yearModal').classList.add('active');
         }
@@ -576,17 +660,14 @@
 
         function calculateYearTotal() {
             let totalEq = 0, totalE = 0, totalWq = 0, totalW = 0;
-            
             document.querySelectorAll('.elec-qty').forEach(input => totalEq += parseNumber(input.value));
             document.querySelectorAll('.elec-input').forEach(input => totalE += parseNumber(input.value));
             document.querySelectorAll('.water-qty').forEach(input => totalWq += parseNumber(input.value));
             document.querySelectorAll('.water-input').forEach(input => totalW += parseNumber(input.value));
-
             document.getElementById('totalElecQty').innerText = formatNumber(totalEq);
             document.getElementById('totalElec').innerText = formatNumber(totalE);
             document.getElementById('totalWaterQty').innerText = formatNumber(totalWq);
             document.getElementById('totalWater').innerText = formatNumber(totalW);
-            
             document.getElementById('grandTotalYear').innerText = formatNumber(totalE + totalW);
         }
 
@@ -595,17 +676,13 @@
             const elecInputs = document.querySelectorAll('.elec-input');
             const waterQtys = document.querySelectorAll('.water-qty');
             const waterInputs = document.querySelectorAll('.water-input');
-            
             const newData = [];
             for(let i = 0; i < 12; i++) {
                 newData.push({
-                    eq: parseNumber(elecQtys[i].value),
-                    e: parseNumber(elecInputs[i].value),
-                    wq: parseNumber(waterQtys[i].value),
-                    w: parseNumber(waterInputs[i].value)
+                    eq: parseNumber(elecQtys[i].value), e: parseNumber(elecInputs[i].value),
+                    wq: parseNumber(waterQtys[i].value), w: parseNumber(waterInputs[i].value)
                 });
             }
-            
             appData.years[currentEditingYear] = newData;
             saveData();
             closeModal('yearModal');
@@ -615,9 +692,7 @@
         function openAdvancesModal() {
             const tbody = document.getElementById('advancesTableBody');
             tbody.innerHTML = '';
-            
             if (appData.advances.length === 0) appData.advances.push({date: '', amount: 0});
-
             appData.advances.forEach((adv, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -645,7 +720,6 @@
         function saveAdvancesData() {
             const dates = document.querySelectorAll('.adv-date');
             const amounts = document.querySelectorAll('.adv-amount');
-            
             const newAdvances = [];
             for(let i = 0; i < dates.length; i++) {
                 let amt = parseNumber(amounts[i].value);
@@ -659,42 +733,23 @@
         }
 
         function openStatsModal() {
-            // Render bảng thống kê chi tiết theo năm
             const tbody = document.getElementById('statsTableBody');
             tbody.innerHTML = '';
             let tongChiTatCa = 0;
-            
             const sortedYears = Object.keys(appData.years).sort((a, b) => b - a);
-            
             sortedYears.forEach(year => {
-                let sumE = 0;
-                let sumW = 0;
+                let sumE = 0, sumW = 0;
                 appData.years[year].forEach(month => {
-                    sumE += (month.e || 0);
-                    sumW += (month.w || 0);
+                    sumE += (month.e || 0); sumW += (month.w || 0);
                 });
-                
                 let sumYear = sumE + sumW;
                 tongChiTatCa += sumYear;
-                
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="month-col">${year}</td>
-                        <td class="col-elec">${formatNumber(sumE)}</td>
-                        <td class="col-water">${formatNumber(sumW)}</td>
-                        <td class="text-success" style="font-weight:bold">${formatNumber(sumYear)}</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td class="month-col">${year}</td><td class="col-elec">${formatNumber(sumE)}</td><td class="col-water">${formatNumber(sumW)}</td><td class="text-success" style="font-weight:bold">${formatNumber(sumYear)}</td></tr>`;
             });
-
-            // Tính tổng thu
             let tongThu = appData.advances.reduce((sum, item) => sum + item.amount, 0);
-
-            // Gán dữ liệu cho các khối dưới
             document.getElementById('statTotalIncome').innerText = formatNumber(tongThu) + " ₫";
             document.getElementById('statTotalExpense').innerText = formatNumber(tongChiTatCa) + " ₫";
             document.getElementById('statBalance').innerText = formatNumber(tongThu - tongChiTatCa) + " ₫";
-
             document.getElementById('statsModal').classList.add('active');
         }
 
@@ -707,6 +762,8 @@
             closeModal('manageModal');
             if(modalId === 'advancesModal') openAdvancesModal();
             if(modalId === 'statsModal') openStatsModal();
+            if(modalId === 'priceElecModal') document.getElementById('priceElecModal').classList.add('active');
+            if(modalId === 'priceWaterModal') document.getElementById('priceWaterModal').classList.add('active');
         }
 
         function backToManage(currentModalId) {
@@ -719,8 +776,7 @@
             const a = document.createElement('a');
             a.href = dataStr;
             a.download = `DuLieuChiTieu_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a);
-            a.click();
+            document.body.appendChild(a).click();
             a.remove();
         }
 
@@ -732,17 +788,10 @@
                     try {
                         const imported = JSON.parse(e.target.result);
                         if (imported.years && imported.advances) {
-                            appData = imported;
-                            saveData();
-                            renderHome();
-                            alert("Nhập dữ liệu thành công!");
-                            closeModal('manageModal');
-                        } else {
-                            alert("Định dạng file không đúng!");
-                        }
-                    } catch (err) {
-                        alert("Lỗi! Không thể đọc file JSON.");
-                    }
+                            appData = imported; saveData(); renderHome();
+                            alert("Nhập dữ liệu thành công!"); closeModal('manageModal');
+                        } else { alert("Định dạng file không đúng!"); }
+                    } catch (err) { alert("Lỗi! Không thể đọc file JSON."); }
                 };
                 reader.readAsText(file);
             }
@@ -752,27 +801,20 @@
         function backupHTML() {
             closeModal('manageModal'); 
             setTimeout(() => {
-                let dataScript = document.getElementById('backupData');
-                if(!dataScript) {
-                    dataScript = document.createElement('script');
-                    dataScript.id = 'backupData';
-                    dataScript.type = 'application/json';
-                    document.head.appendChild(dataScript);
-                }
+                let dataScript = document.getElementById('backupData') || document.createElement('script');
+                dataScript.id = 'backupData'; dataScript.type = 'application/json';
                 dataScript.textContent = JSON.stringify(appData);
+                if (!document.getElementById('backupData')) document.head.appendChild(dataScript);
 
                 const htmlContent = "<!DOCTYPE html>\n<html lang=\"vi\">\n" + document.documentElement.innerHTML + "\n</html>";
                 const blob = new Blob([htmlContent], {type: "text/html;charset=utf-8"});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `SaoLuu_SoChiTieu_${new Date().toISOString().slice(0,10)}.html`;
-                a.click();
-                URL.revokeObjectURL(url);
+                a.href = url; a.download = `SaoLuu_SoChiTieu_${new Date().toISOString().slice(0,10)}.html`;
+                a.click(); URL.revokeObjectURL(url);
             }, 200);
         }
 
-        // --- 6. TIỆN ÍCH ---
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
