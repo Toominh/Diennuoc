@@ -142,6 +142,11 @@
             color: var(--primary);
             border: 1px solid var(--primary);
         }
+        
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
 
         /* Menu Buttons inside Manager */
         .menu-btn {
@@ -312,8 +317,11 @@
             outline: none;
         }
 
-        .col-elec { color: #fca5a5; }
-        .col-water { color: #93c5fd; }
+        /* MÀU ĐẶC TRƯNG CHO ĐIỆN VÀ NƯỚC */
+        .col-elec { color: #fbbf24 !important; } /* Vàng cam cho Tiền điện */
+        .col-elec-qty { color: #f87171 !important; } /* Đỏ nhạt cho Số điện */
+        .col-water { color: #38bdf8 !important; } /* Xanh dương cho Tiền nước */
+        .col-water-qty { color: #34d399 !important; } /* Xanh lá cho Số nước */
 
         .total-row td {
             background-color: #1e293b !important;
@@ -329,10 +337,10 @@
         }
 
         .stats-table-container {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             max-height: 250px;
             overflow-y: auto;
-            overflow-x: auto; /* Cho phép cuộn ngang */
+            overflow-x: auto; 
             border: 1px solid var(--border);
             border-radius: 8px;
         }
@@ -358,25 +366,6 @@
             margin-top: 15px;
         }
 
-        .btn-auto {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            padding: 4px 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-auto-elec { color: #fbbf24; }
-        .btn-auto-water { color: #60a5fa; }
-        .btn-auto:hover {
-            background-color: var(--border);
-            transform: scale(1.05);
-        }
         .flex-cell {
             display: flex; 
             align-items: center; 
@@ -384,6 +373,21 @@
             gap: 4px;
             padding: 0 4px;
         }
+
+        /* Phân trang Grid */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .pagination-container button {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -394,18 +398,15 @@
 
     <div class="container">
         <div class="year-list" id="yearList">
-            <!-- Render bằng JS -->
-        </div>
+            </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer-nav">
         <button class="btn-outline" onclick="openAddYearModal()">+ Thêm năm</button>
         <button class="menu-btn" onclick="openFromManage('statsModal')">Thống kê <span>&rarr;</span></button> 
         <button onclick="openManageModal()">Quản lý</button>
     </div>
 
-    <!-- Modal: Thêm Năm -->
     <div class="modal-overlay" id="addYearModal">
         <div class="modal-content" style="max-width: 350px;">
             <div class="modal-header">
@@ -423,7 +424,6 @@
         </div>
     </div>
 
-    <!-- Modal: Quản lý -->
     <div class="modal-overlay" id="manageModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -450,7 +450,6 @@
         </div>
     </div>
 
-    <!-- Modal: Giá Điện -->
     <div class="modal-overlay" id="priceElecModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -485,7 +484,6 @@
         </div>
     </div>
 
-    <!-- Modal: Giá Nước -->
     <div class="modal-overlay" id="priceWaterModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -529,7 +527,6 @@
         </div>
     </div>
 
-    <!-- Modal: Chi tiết Năm -->
     <div class="modal-overlay" id="yearModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -551,9 +548,9 @@
                     <tfoot>
                         <tr class="total-row">
                             <td>Tổng</td>
-                            <td id="totalElecQty" class="col-elec">0</td>
+                            <td id="totalElecQty" class="col-elec-qty">0</td>
                             <td id="totalElec" class="col-elec">0</td>
-                            <td id="totalWaterQty" class="col-water">0</td>
+                            <td id="totalWaterQty" class="col-water-qty">0</td>
                             <td id="totalWater" class="col-water">0</td>
                         </tr>
                         <tr class="grand-total-row">
@@ -569,7 +566,6 @@
         </div>
     </div>
 
-    <!-- Modal: Tạm ứng -->
     <div class="modal-overlay" id="advancesModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -604,7 +600,6 @@
         </div>
     </div>
 
-    <!-- Modal: Thống kê -->
     <div class="modal-overlay" id="statsModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -643,12 +638,11 @@
                     <div class="stat-value text-primary" id="statBalance">0 ₫</div>
                 </div>
 
-                <!-- 2 Nút Thống Kê Theo Lưới Đã Gộp (Điện/Nước) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="btn-outline" onclick="openCombinedGridStats('elec', 'Thống Kê Điện (Tiền & Số)')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                    <button class="btn-outline" onclick="openCombinedGridStats('elec', 'Thống Kê Điện (Tiền & Số)', 0)" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px; border-color: #fbbf24; color: #fbbf24;">
                         ⚡ Điện (Tiền | Số)
                     </button>
-                    <button class="btn-outline" onclick="openCombinedGridStats('water', 'Thống Kê Nước (Tiền & Số)')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                    <button class="btn-outline" onclick="openCombinedGridStats('water', 'Thống Kê Nước (Tiền & Số)', 0)" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px; border-color: #38bdf8; color: #38bdf8;">
                         💧 Nước (Tiền | Số)
                     </button>
                 </div>
@@ -656,7 +650,6 @@
         </div>
     </div>
 
-    <!-- Modal: Thống Kê Lưới Chung Của Từng Năm -->
     <div class="modal-overlay" id="monthlyGridModal">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -667,16 +660,18 @@
                 <button class="close-btn" onclick="closeModal('monthlyGridModal')">&times;</button>
             </div>
             <div class="modal-body" style="padding: 10px;">
-                <div class="stats-table-container" style="max-height: 60vh;">
+                <div class="stats-table-container" style="max-height: 55vh;">
                     <table>
                         <thead style="position: sticky; top: 0; z-index: 2;" id="gridThead">
-                            <!-- Render via JS -->
-                        </thead>
+                            </thead>
                         <tbody id="gridTbody">
-                            <!-- Render via JS -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
+                
+                <div id="gridPagination" class="pagination-container">
+                    </div>
+
             </div>
         </div>
     </div>
@@ -798,7 +793,7 @@
                     </td>
                     <td>
                         <div class="flex-cell">
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money elec-qty col-elec-qty" value="${monthData.eq || ''}" oninput="formatInput(this); calculateYearTotal()">
                         </div>
                     </td>
                     <td>
@@ -806,7 +801,7 @@
                     </td>
                     <td>
                         <div class="flex-cell">
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-money water-qty col-water-qty" value="${monthData.wq || ''}" oninput="formatInput(this); calculateYearTotal()">
                         </div>
                     </td>
                     <td>
@@ -1019,8 +1014,17 @@
             document.getElementById('statsModal').classList.add('active');
         }
 
-        // --- 5. TÍNH NĂNG THỐNG KÊ GỘP CHUNG (Tiền | Số) ---
-        function openCombinedGridStats(type, title) {
+        // --- 5. TÍNH NĂNG THỐNG KÊ GỘP CHUNG CÓ PHÂN TRANG ---
+        let currentGridType = '';
+        let currentGridTitle = '';
+        let currentGridPage = 0;
+        const YEARS_PER_PAGE = 3;
+
+        function openCombinedGridStats(type, title, page = 0) {
+            currentGridType = type;
+            currentGridTitle = title;
+            currentGridPage = page;
+
             closeModal('statsModal');
             document.getElementById('monthlyGridModal').classList.add('active');
             document.getElementById('gridModalTitle').innerText = title;
@@ -1029,26 +1033,36 @@
             const tbody = document.getElementById('gridTbody');
             
             const years = Object.keys(appData.years).sort((a, b) => b - a);
+            const totalPages = Math.ceil(years.length / YEARS_PER_PAGE) || 1;
             
-            // Xác định key lấy dữ liệu tương ứng với Điện hoặc Nước
+            // Lấy 3 năm cho trang hiện tại
+            const startIndex = page * YEARS_PER_PAGE;
+            const pageYears = years.slice(startIndex, startIndex + YEARS_PER_PAGE);
+
             const propMoney = type === 'elec' ? 'e' : 'w';
             const propQty = type === 'elec' ? 'eq' : 'wq';
-            const tdClass = type === 'elec' ? 'col-elec' : 'col-water';
-            const subTitle = type === 'elec' ? '(Tiền | Số điện)' : '(Tiền | Số nước)';
+            
+            // Cài đặt màu phân biệt
+            const colorMoneyClass = type === 'elec' ? 'col-elec' : 'col-water';
+            const colorQtyClass = type === 'elec' ? 'col-elec-qty' : 'col-water-qty';
 
-            // Xây dựng Header Tên cột kèm phụ đề nhỏ bên dưới cho dễ hiểu
-            let headHtml = `<tr><th width="10%" style="vertical-align: middle;">Tháng</th>`;
-            years.forEach(year => {
-                headHtml += `<th>${year}<br><span style="font-size:0.75rem; font-weight:normal; color:var(--text-muted)">${subTitle}</span></th>`;
+            // Render Header
+            let headHtml = `<tr><th width="15%" style="vertical-align: middle;">Tháng</th>`;
+            pageYears.forEach(year => {
+                headHtml += `<th style="font-size:1.1rem" class="${colorMoneyClass}">${year}<br>
+                             <span style="font-size:0.75rem; font-weight:normal; opacity: 0.8">
+                                 (<span class="${colorMoneyClass}">Tiền</span> | <span class="${colorQtyClass}">Số ${type === 'elec' ? 'điện' : 'nước'}</span>)
+                             </span>
+                             </th>`;
             });
             headHtml += `</tr>`;
             thead.innerHTML = headHtml;
 
-            // Xây dựng Tbody (Hiển thị dạng: Tiền | Số)
+            // Render Body
             tbody.innerHTML = '';
             for (let i = 0; i < 12; i++) {
                 let rowHtml = `<tr><td class="month-col">${i + 1}</td>`;
-                years.forEach(year => {
+                pageYears.forEach(year => {
                     const monthData = appData.years[year][i];
                     const valMoney = (monthData && monthData[propMoney]) ? monthData[propMoney] : 0;
                     const valQty = (monthData && monthData[propQty]) ? monthData[propQty] : 0;
@@ -1057,15 +1071,48 @@
                     if (valMoney > 0 || valQty > 0) {
                         let textMoney = valMoney > 0 ? formatNumber(valMoney) : '0';
                         let textQty = valQty > 0 ? formatNumber(valQty) : '0';
-                        cellContent = `${textMoney} <span style="color: var(--text-muted); margin: 0 4px;">|</span> ${textQty}`;
+                        // Tách riêng class màu cho tiền và số
+                        cellContent = `<span class="${colorMoneyClass}">${textMoney}</span> <span style="opacity: 0.4; margin: 0 4px; color: var(--text-muted)">|</span> <span class="${colorQtyClass}">${textQty}</span>`;
                     }
                     
-                    // white-space: nowrap để hai giá trị không bị rớt dòng
-                    rowHtml += `<td class="${tdClass}" style="white-space: nowrap;">${cellContent}</td>`;
+                    // Không áp dụng màu đè lên toàn bộ thẻ td nữa
+                    rowHtml += `<td style="white-space: nowrap;">${cellContent}</td>`;
                 });
                 rowHtml += `</tr>`;
                 tbody.innerHTML += rowHtml;
             }
+
+            // Render Phân Trang
+            renderPaginationControls(totalPages);
+        }
+
+        function renderPaginationControls(totalPages) {
+            const paginationDiv = document.getElementById('gridPagination');
+            paginationDiv.innerHTML = '';
+
+            if (totalPages <= 1) return; // Nếu chỉ có 1 trang (từ 1 đến 3 năm) thì không hiện phân trang
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'btn-outline';
+            prevBtn.innerText = '⬅ Trước';
+            prevBtn.disabled = currentGridPage === 0;
+            prevBtn.onclick = () => openCombinedGridStats(currentGridType, currentGridTitle, currentGridPage - 1);
+
+            const pageInfo = document.createElement('span');
+            pageInfo.style.color = 'var(--text-main)';
+            pageInfo.style.fontWeight = 'bold';
+            pageInfo.style.fontSize = '0.95rem';
+            pageInfo.innerText = `Trang ${currentGridPage + 1} / ${totalPages}`;
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'btn-outline';
+            nextBtn.innerText = 'Sau ➡';
+            nextBtn.disabled = currentGridPage >= totalPages - 1;
+            nextBtn.onclick = () => openCombinedGridStats(currentGridType, currentGridTitle, currentGridPage + 1);
+
+            paginationDiv.appendChild(prevBtn);
+            paginationDiv.appendChild(pageInfo);
+            paginationDiv.appendChild(nextBtn);
         }
 
         function backToStatsFromGrid() {
