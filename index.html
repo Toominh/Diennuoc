@@ -400,6 +400,7 @@
     <!-- Footer -->
     <div class="footer-nav">
         <button class="btn-outline" onclick="openAddYearModal()">+ Thêm năm</button>
+        <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button> 
         <button onclick="openManageModal()">Quản lý ⚙️</button>
     </div>
 
@@ -429,7 +430,7 @@
                 <button class="close-btn" onclick="closeModal('manageModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button>    
+                 
                 <button class="menu-btn" onclick="openFromManage('advancesModal')">💰 Tạm ứng <span>&rarr;</span></button>
                 <hr class="menu-divider">
                 <button class="menu-btn" onclick="openFromManage('priceElecModal')">⚡ Giá điện sinh hoạt <span>&rarr;</span></button>
@@ -1070,7 +1071,7 @@
             // Xây dựng Tbody
             tbody.innerHTML = '';
             for (let i = 0; i < 12; i++) {
-                let rowHtml = `<tr><td class="month-col">T${i + 1}</td>`;
+                let rowHtml = `<tr><td class="month-col">${i + 1}</td>`;
                 years.forEach(year => {
                     const monthData = appData.years[year][i];
                     const val = (monthData && monthData[type]) ? monthData[type] : 0;
