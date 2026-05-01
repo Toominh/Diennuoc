@@ -332,6 +332,7 @@
             margin-bottom: 20px;
             max-height: 250px;
             overflow-y: auto;
+            overflow-x: auto; /* Cho phép cuộn ngang */
             border: 1px solid var(--border);
             border-radius: 8px;
         }
@@ -400,8 +401,8 @@
     <!-- Footer -->
     <div class="footer-nav">
         <button class="btn-outline" onclick="openAddYearModal()">+ Thêm năm</button>
-        <button class="menu-btn" onclick="openFromManage('statsModal')">📊 Thống kê <span>&rarr;</span></button> 
-        <button onclick="openManageModal()">Quản lý ⚙️</button>
+        <button class="menu-btn" onclick="openFromManage('statsModal')">Thống kê <span>&rarr;</span></button> 
+        <button onclick="openManageModal()">Quản lý</button>
     </div>
 
     <!-- Modal: Thêm Năm -->
@@ -435,8 +436,6 @@
                 <hr class="menu-divider">
                 <button class="menu-btn" onclick="openFromManage('priceElecModal')">⚡ Giá điện sinh hoạt <span>&rarr;</span></button>
                 <button class="menu-btn" onclick="openFromManage('priceWaterModal')">💧 Giá nước sinh hoạt <span>&rarr;</span></button>
-                
-                
                 
                 <hr class="menu-divider">
                 
@@ -644,26 +643,20 @@
                     <div class="stat-value text-primary" id="statBalance">0 ₫</div>
                 </div>
 
-                <!-- 4 Nút Thống Kê Theo Lưới (Điện/Nước x Tiền/Số) -->
+                <!-- 2 Nút Thống Kê Theo Lưới Đã Gộp (Điện/Nước) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="btn-outline" onclick="openMonthlyGridStats('e', 'Thống Kê Tiền Điện Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
-                        ⚡ Tiền Điện
+                    <button class="btn-outline" onclick="openCombinedGridStats('elec', 'Thống Kê Điện (Tiền & Số)')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        ⚡ Điện (Tiền | Số)
                     </button>
-                    <button class="btn-outline" onclick="openMonthlyGridStats('w', 'Thống Kê Tiền Nước Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
-                        💧 Tiền Nước
-                    </button>
-                    <button class="btn-outline" onclick="openMonthlyGridStats('eq', 'Thống Kê Số Điện (kWh) Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
-                        ⚡ Số Điện (kWh)
-                    </button>
-                    <button class="btn-outline" onclick="openMonthlyGridStats('wq', 'Thống Kê Số Nước (m³) Theo Tháng')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
-                        💧 Số Nước (m³)
+                    <button class="btn-outline" onclick="openCombinedGridStats('water', 'Thống Kê Nước (Tiền & Số)')" style="display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.85rem; padding: 12px;">
+                        💧 Nước (Tiền | Số)
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Thống Kê Lưới Chung Của Từng Năm (Dùng chung cho 4 nút) -->
+    <!-- Modal: Thống Kê Lưới Chung Của Từng Năm -->
     <div class="modal-overlay" id="monthlyGridModal">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -676,7 +669,7 @@
             <div class="modal-body" style="padding: 10px;">
                 <div class="stats-table-container" style="max-height: 60vh;">
                     <table>
-                        <thead style="position: sticky; top: 0;" id="gridThead">
+                        <thead style="position: sticky; top: 0; z-index: 2;" id="gridThead">
                             <!-- Render via JS -->
                         </thead>
                         <tbody id="gridTbody">
@@ -849,48 +842,34 @@
         }
 
         function handleElecInput(input) {
-            // 1. Định dạng số khi nhập (thêm dấu chấm)
             formatInput(input);
-            
-            // 2. Lấy giá trị vừa nhập (ví dụ nhập 100 thì lấy 100)
             const moneyValue = parseNumber(input.value);
-            
             const row = input.closest('tr');
             const qtyInput = row.querySelector('.elec-qty');
             
-            // 3. Nhân 1000 và tính số điện
             if (moneyValue > 0) {
-                const actualMoney = moneyValue * 1000; // Tự động nhân 1000
+                const actualMoney = moneyValue * 1000;
                 const kwh = calculateKwhFromMoney(actualMoney);
                 qtyInput.value = formatNumber(kwh);
             } else {
-                qtyInput.value = ''; // Nếu xóa hết tiền thì xóa luôn số điện
+                qtyInput.value = '';
             }
-            
-            // 4. Tính lại tổng cộng dưới chân bảng
             calculateYearTotal();
         }
 
         function handleWaterInput(input) {
-            // 1. Định dạng số khi nhập (thêm dấu chấm)
             formatInput(input);
-            
-            // 2. Lấy giá trị vừa nhập
             const moneyValue = parseNumber(input.value);
-            
             const row = input.closest('tr');
             const qtyInput = row.querySelector('.water-qty');
             
-            // 3. Nhân 1000 và tính số nước
             if (moneyValue > 0) {
-                const actualMoney = moneyValue * 1000; // Tự động nhân 1000
+                const actualMoney = moneyValue * 1000;
                 const waterM3 = calculateWaterFromMoney(actualMoney);
                 qtyInput.value = formatNumber(waterM3);
             } else {
-                qtyInput.value = ''; // Nếu xóa hết tiền thì xóa luôn số nước
+                qtyInput.value = '';
             }
-            
-            // 4. Tính lại tổng cộng dưới chân bảng
             calculateYearTotal();
         }
 
@@ -921,8 +900,6 @@
             return Math.round(kwh);
         }
 
-
-        
         function calculateWaterFromMoney(totalMoney) {
             if (!totalMoney || totalMoney <= 0) return 0;
             let remainingMoney = totalMoney;
@@ -948,8 +925,6 @@
             return Math.round(cubicMeters);
         }
 
-
-
         function saveYearData() {
             const elecQtys = document.querySelectorAll('.elec-qty');
             const elecInputs = document.querySelectorAll('.elec-input');
@@ -967,13 +942,13 @@
             closeModal('yearModal');
         }
 
-        // Hàm chuyển "YYYY-MM-DD" thành "DD/MM/YYYY" hiển thị cho đẹp
         function formatVNDate(dateStr) {
             if (!dateStr) return '';
             const parts = dateStr.split('-');
             if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
             return dateStr;
         }
+
         // --- 4. TẠM ỨNG & THỐNG KÊ ---
         function openAdvancesModal() {
             const tbody = document.getElementById('advancesTableBody');
@@ -984,11 +959,8 @@
                 tr.innerHTML = `
                     <td class="month-col">${index + 1}</td>
                     <td>
-                        <!-- Thẻ hiển thị định dạng số DD/MM/YYYY -->
                         <input type="text" value="${formatVNDate(adv.date)}" placeholder="dd/mm/yyyy" readonly style="cursor: pointer;"
                                onfocus="this.style.display='none'; this.nextElementSibling.style.display=''; this.nextElementSibling.focus();">
-                        
-                        <!-- Thẻ chọn ngày thực tế của hệ thống (bị ẩn) -->
                         <input type="date" class="adv-date" value="${adv.date}" style="display:none;" 
                                onblur="this.style.display='none'; this.previousElementSibling.style.display=''; this.previousElementSibling.value=formatVNDate(this.value);">
                     </td>
@@ -1047,9 +1019,8 @@
             document.getElementById('statsModal').classList.add('active');
         }
 
-        // --- 5. TÍNH NĂNG THỐNG KÊ LƯỚI THEO THÁNG DÙNG CHUNG ---
-        // type: 'e' (tiền điện), 'w' (tiền nước), 'eq' (số điện), 'wq' (số nước)
-        function openMonthlyGridStats(type, title) {
+        // --- 5. TÍNH NĂNG THỐNG KÊ GỘP CHUNG (Tiền | Số) ---
+        function openCombinedGridStats(type, title) {
             closeModal('statsModal');
             document.getElementById('monthlyGridModal').classList.add('active');
             document.getElementById('gridModalTitle').innerText = title;
@@ -1057,28 +1028,40 @@
             const thead = document.getElementById('gridThead');
             const tbody = document.getElementById('gridTbody');
             
-            // Đã sửa: Sắp xếp Giảm Dần (b - a) để năm mới nhất ở bên trái
             const years = Object.keys(appData.years).sort((a, b) => b - a);
             
-            // Xây dựng Header Tên cột
-            let headHtml = `<tr><th width="10%">Tháng</th>`;
+            // Xác định key lấy dữ liệu tương ứng với Điện hoặc Nước
+            const propMoney = type === 'elec' ? 'e' : 'w';
+            const propQty = type === 'elec' ? 'eq' : 'wq';
+            const tdClass = type === 'elec' ? 'col-elec' : 'col-water';
+            const subTitle = type === 'elec' ? '(Tiền | Số điện)' : '(Tiền | Số nước)';
+
+            // Xây dựng Header Tên cột kèm phụ đề nhỏ bên dưới cho dễ hiểu
+            let headHtml = `<tr><th width="10%" style="vertical-align: middle;">Tháng</th>`;
             years.forEach(year => {
-                headHtml += `<th>${year}</th>`;
+                headHtml += `<th>${year}<br><span style="font-size:0.75rem; font-weight:normal; color:var(--text-muted)">${subTitle}</span></th>`;
             });
             headHtml += `</tr>`;
             thead.innerHTML = headHtml;
 
-            // Xây dựng Tbody
+            // Xây dựng Tbody (Hiển thị dạng: Tiền | Số)
             tbody.innerHTML = '';
             for (let i = 0; i < 12; i++) {
                 let rowHtml = `<tr><td class="month-col">${i + 1}</td>`;
                 years.forEach(year => {
                     const monthData = appData.years[year][i];
-                    const val = (monthData && monthData[type]) ? monthData[type] : 0;
+                    const valMoney = (monthData && monthData[propMoney]) ? monthData[propMoney] : 0;
+                    const valQty = (monthData && monthData[propQty]) ? monthData[propQty] : 0;
                     
-                    let tdClass = (type === 'e' || type === 'eq') ? 'col-elec' : 'col-water';
+                    let cellContent = '';
+                    if (valMoney > 0 || valQty > 0) {
+                        let textMoney = valMoney > 0 ? formatNumber(valMoney) : '0';
+                        let textQty = valQty > 0 ? formatNumber(valQty) : '0';
+                        cellContent = `${textMoney} <span style="color: var(--text-muted); margin: 0 4px;">|</span> ${textQty}`;
+                    }
                     
-                    rowHtml += `<td class="${tdClass}">${val > 0 ? formatNumber(val) : ''}</td>`;
+                    // white-space: nowrap để hai giá trị không bị rớt dòng
+                    rowHtml += `<td class="${tdClass}" style="white-space: nowrap;">${cellContent}</td>`;
                 });
                 rowHtml += `</tr>`;
                 tbody.innerHTML += rowHtml;
