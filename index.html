@@ -1205,41 +1205,82 @@
         }
 
         // --- 7. NẠP DỮ LIỆU TỪ THƯ MỤC DATA ---
+
+        // Phát hiện GitHub Pages và trả về GitHub API URL nếu có
+        function getGithubApiUrl() {
+            const hostname = window.location.hostname;
+            if (!hostname.endsWith('.github.io')) return null;
+            const owner = hostname.replace('.github.io', '');
+            // Lấy tên repo từ path: /reponame/... hoặc / (repo = owner.github.io)
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            const repo = pathParts.length > 0 ? pathParts[0] : `${owner}.github.io`;
+            return `https://api.github.com/repos/${owner}/${repo}/contents/data`;
+        }
+
+        async function fetchFileListFromGithub(apiUrl) {
+            const res = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+            if (!res.ok) throw new Error('GitHub API lỗi: ' + res.status);
+            const items = await res.json();
+            return items
+                .filter(item => item.type === 'file' && item.name.toLowerCase().endsWith('.json'))
+                .map(item => item.name);
+        }
+
+        async function fetchFileListFromDirectoryListing() {
+            const res = await fetch('data/');
+            if (!res.ok) throw new Error('Không thể đọc thư mục');
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const links = Array.from(doc.querySelectorAll('a[href]'));
+            const files = links
+                .map(a => a.getAttribute('href'))
+                .filter(href => href && href.toLowerCase().endsWith('.json') && !href.startsWith('?') && !href.startsWith('/'))
+                .map(href => decodeURIComponent(href.replace(/\/$/, '')));
+            if (files.length === 0) throw new Error('Không tìm thấy file JSON');
+            return files;
+        }
+
         async function openLoadDataModal() {
             closeModal('manageModal');
             document.getElementById('loadDataModal').classList.add('active');
             const listEl = document.getElementById('jsonFileList');
-            listEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">Đang tải danh sách...</p>';
+            listEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:20px;">⏳ Đang tải danh sách...</p>';
 
             let files = [];
+            let errorMsg = '';
 
-            // Thử fetch thư mục data/ để lấy danh sách file
-            try {
-                const res = await fetch('data/');
-                const html = await res.text();
+            // Ưu tiên GitHub API nếu đang chạy trên GitHub Pages
+            const githubApiUrl = getGithubApiUrl();
+            if (githubApiUrl) {
+                try {
+                    files = await fetchFileListFromGithub(githubApiUrl);
+                } catch(e) {
+                    errorMsg = 'GitHub API: ' + e.message;
+                }
+            }
 
-                // Parse các link .json từ directory listing
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const links = Array.from(doc.querySelectorAll('a[href]'));
-                files = links
-                    .map(a => a.getAttribute('href'))
-                    .filter(href => href && href.toLowerCase().endsWith('.json') && !href.startsWith('?') && !href.startsWith('/'))
-                    .map(href => decodeURIComponent(href.replace(/\/$/, '')));
-            } catch (e) {
-                files = [];
+            // Fallback: thử directory listing (dùng được với local HTTP server)
+            if (files.length === 0) {
+                try {
+                    files = await fetchFileListFromDirectoryListing();
+                } catch(e) {
+                    if (!errorMsg) errorMsg = e.message;
+                }
             }
 
             if (files.length === 0) {
                 listEl.innerHTML = `
                     <div style="text-align:center; padding:20px; color:var(--text-muted);">
                         <div style="font-size:2rem; margin-bottom:10px;">📭</div>
-                        <p style="margin-bottom:8px;">Không tìm thấy file JSON nào.</p>
-                        <p style="font-size:0.8rem; line-height:1.5;">
-                            Hãy đặt file <code style="color:var(--primary)">.json</code> vào thư mục 
-                            <code style="color:var(--primary)">data/</code> cùng cấp với file HTML<br>
-                            và mở trang qua HTTP server (không mở trực tiếp file).
+                        <p style="margin-bottom:8px; color:var(--text-main);">Không tìm thấy file JSON nào.</p>
+                        <p style="font-size:0.8rem; line-height:1.6;">
+                            Hãy đặt file <code style="color:var(--primary)">.json</code> vào thư mục
+                            <code style="color:var(--primary)">data/</code> trong repo GitHub.<br><br>
+                            Cấu trúc thư mục cần có:<br>
+                            <code style="color:var(--success)">📁 data/<br>&nbsp;&nbsp;📄 ten-file.json</code>
                         </p>
+                        ${errorMsg ? `<p style="font-size:0.75rem; color:var(--danger); margin-top:10px;">${errorMsg}</p>` : ''}
                     </div>`;
                 return;
             }
@@ -1263,7 +1304,7 @@
             if (!confirm(`Bạn có chắc muốn nạp dữ liệu từ file:\n"${filename}"?\n\nDữ liệu hiện tại sẽ bị thay thế.`)) return;
             try {
                 const res = await fetch('data/' + filename);
-                if (!res.ok) throw new Error('Không thể tải file');
+                if (!res.ok) throw new Error('Không thể tải file (HTTP ' + res.status + ')');
                 const imported = await res.json();
                 if (imported.years && imported.advances) {
                     appData = imported;
